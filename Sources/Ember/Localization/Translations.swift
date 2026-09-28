@@ -2,6 +2,16 @@ import Foundation
 
 extension L {
     static let ptBR: [String: String] = [
+        "Settings…": "Ajustes…",
+        "Startup": "Início",
+        "Behavior": "Comportamento",
+        "With both on, the Mac is protected from the moment you log in.": "Com as duas ligadas, o Mac fica protegido desde que você entra na sessão.",
+        "The Mac stays awake and the screen sleeps — good for a long build.": "O Mac fica acordado e a tela apaga — bom para um build longo.",
+        "The screen stays on, like caffeinate -d. This also keeps the Mac awake.": "A tela fica acesa, como o caffeinate -d. Isso também mantém o Mac acordado.",
+        "Keeps the Mac awake, from the menu bar": "Mantém o Mac acordado, a partir da barra de menus",
+        "Ember talks to the system power manager directly, the same way caffeinate does. There is no helper process and no background service: the lock is released the moment Ember quits.": "O Ember fala direto com o gerenciador de energia do sistema, do mesmo jeito que o caffeinate. Não há processo auxiliar nem serviço em segundo plano: a trava se desfaz no instante em que o Ember encerra.",
+        "Source code": "Código-fonte",
+        "Report a problem": "Relatar um problema",
         "Keep the display on": "Manter a tela acesa",
         "Keep the Mac awake, screen may sleep": "Manter o Mac acordado, a tela pode apagar",
         "Until I turn it off": "Até eu desligar",
@@ -15,7 +25,9 @@ extension L {
         "Off": "Desligado",
         "Turn off": "Desligar",
         "Keep awake for": "Manter acordado por",
-        "Mode": "Modo",
+        "Let the screen turn off": "Deixar a tela apagar",
+        "for": "há",
+
         "tela acesa": "tela acesa",
         "só o sistema": "só o sistema",
         "Open at login": "Abrir ao iniciar a sessão",

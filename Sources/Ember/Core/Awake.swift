@@ -39,10 +39,15 @@ final class Awake {
         }
 
         /// O tipo de asserção correspondente no IOKit.
+        ///
+        /// As constantes modernas, e não as antigas `NoDisplaySleep` e
+        /// `NoIdleSleep`: aquelas estão obsoletas há anos e hoje funcionam só
+        /// por compatibilidade. São também as que o `caffeinate` usa, o que
+        /// deixa o comportamento idêntico ao dele em vez de parecido.
         var assertionType: String {
             switch self {
-            case .display: kIOPMAssertionTypeNoDisplaySleep as String
-            case .system: kIOPMAssertionTypeNoIdleSleep as String
+            case .display: kIOPMAssertPreventUserIdleDisplaySleep as String
+            case .system: kIOPMAssertPreventUserIdleSystemSleep as String
             }
         }
     }
@@ -51,6 +56,10 @@ final class Awake {
     private(set) var mode: Mode = .display
     /// Quando a trava se desfaz sozinha. `nil` é indefinido.
     private(set) var endsAt: Date?
+    /// Quando começou. Sem limite de tempo, "há quanto tempo" é a única
+    /// informação de progresso possível — e é a que responde "isto ainda está
+    /// valendo?", que é a pergunta de quem abre o menu para conferir.
+    private(set) var startedAt: Date?
 
     private var assertion: IOPMAssertionID = IOPMAssertionID(0)
     private var timer: Timer?
@@ -78,6 +87,7 @@ final class Awake {
         assertion = id
         isActive = true
         self.mode = mode
+        startedAt = Date()
         endsAt = duration.map { Date().addingTimeInterval($0) }
 
         if let duration {
@@ -103,6 +113,7 @@ final class Awake {
             assertion = IOPMAssertionID(0)
             isActive = false
             endsAt = nil
+            startedAt = nil
             onChange?()
         }
     }
@@ -113,13 +124,21 @@ final class Awake {
         return max(0, endsAt.timeIntervalSinceNow)
     }
 
-    /// O tempo restante como se lê num relógio.
-    var remainingLabel: String? {
-        guard let remaining else { return nil }
-        let total = Int(remaining.rounded())
-        let hours = total / 3600, minutes = (total % 3600) / 60, seconds = total % 60
-        return hours > 0
-            ? String(format: "%d:%02d:%02d", hours, minutes, seconds)
-            : String(format: "%d:%02d", minutes, seconds)
+    /// Há quanto tempo está segurando.
+    var elapsed: TimeInterval? {
+        guard let startedAt else { return nil }
+        return Date().timeIntervalSince(startedAt)
     }
+
+    /// Segundos como se leem num relógio.
+    static func clock(_ seconds: TimeInterval) -> String {
+        let total = Int(seconds.rounded())
+        let hours = total / 3600, minutes = (total % 3600) / 60, secs = total % 60
+        return hours > 0
+            ? String(format: "%d:%02d:%02d", hours, minutes, secs)
+            : String(format: "%d:%02d", minutes, secs)
+    }
+
+    var remainingLabel: String? { remaining.map(Self.clock) }
+    var elapsedLabel: String? { elapsed.map(Self.clock) }
 }

@@ -29,7 +29,24 @@ final class Model {
     }
 
     var isActive: Bool { awake.isActive }
-    var remainingLabel: String? { awake.remainingLabel }
+
+    /// A linha de estado do topo do menu.
+    ///
+    /// Com prazo, o que importa é quanto falta; sem prazo, há quanto tempo está
+    /// valendo — que é o que responde "isto ainda está de pé?".
+    var statusLine: String {
+        guard isActive else { return L.t("The Mac can sleep normally") }
+        if let restante = awake.remainingLabel {
+            return "\(L.t("Awake")) · \(restante) \(L.t("remaining"))"
+        }
+        return "\(L.t("Awake")) · \(L.t("for")) \(awake.elapsedLabel ?? "0:00")"
+    }
+
+    /// A marca da duração em uso, alinhada com as demais.
+    func mark(_ duration: Duration) -> String {
+        let escolhida = isActive && Defaults.lastDuration == (duration.seconds ?? 0)
+        return escolhida ? "✓ " : "   "
+    }
 
     func start(seconds: TimeInterval?) {
         Defaults.lastDuration = seconds ?? 0
@@ -55,7 +72,10 @@ final class Model {
         ticker = nil
         tick += 1
 
-        guard awake.isActive, awake.endsAt != nil else { return }
+        // Bate de segundo em segundo sempre que está ligado, não só quando há
+        // contagem regressiva: sem prazo, o relógio que anda é o de tempo
+        // decorrido.
+        guard awake.isActive else { return }
         let timer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.tick += 1 }
         }
@@ -70,6 +90,21 @@ struct EmberApp: App {
     @State private var language = L.shared
 
     var body: some Scene {
+        // A janela Sobre precisa ser uma cena própria para o macOS saber
+        // abri-la; `openWindow` a encontra pelo identificador.
+        Window(L.t("About Ember"), id: "sobre") {
+            AboutView()
+                .environment(language)
+        }
+        .windowResizability(.contentSize)
+        .defaultPosition(.center)
+
+        Settings {
+            SettingsView()
+                .environment(model)
+                .environment(language)
+        }
+
         MenuBarExtra {
             MenuView()
                 .environment(model)
@@ -78,7 +113,14 @@ struct EmberApp: App {
             // Preenchido quando está segurando, contornado quando não — a
             // diferença tem de se ler de relance, sem cor, porque a barra de
             // menus é monocromática.
-            Image(systemName: model.isActive ? "cup.and.saucer.fill" : "cup.and.saucer")
+            // O raio, e não uma chama: o que o app faz é segurar uma trava de
+            // energia, e chama em app de barra de menus lê como Tinder antes
+            // de ler como qualquer outra coisa.
+            //
+            // Formas diferentes, não o mesmo desenho preenchido e vazado: em
+            // 16 pixels e sem cor, contorno contra preenchimento quase não se
+            // distingue, enquanto o corte do raio se vê de relance.
+            Image(systemName: model.isActive ? "bolt.fill" : "bolt.slash")
         }
         // `.menu` e não `.window`: é um menu de verdade, com as teclas e o
         // comportamento que o macOS já dá de graça.

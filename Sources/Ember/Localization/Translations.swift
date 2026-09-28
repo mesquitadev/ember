@@ -16,6 +16,8 @@ extension L {
         "Turn off": "Desligar",
         "Keep awake for": "Manter acordado por",
         "Mode": "Modo",
+        "tela acesa": "tela acesa",
+        "só o sistema": "só o sistema",
         "Open at login": "Abrir ao iniciar a sessão",
         "Turn on when Ember opens": "Ligar quando o Ember abrir",
         "Language": "Idioma",

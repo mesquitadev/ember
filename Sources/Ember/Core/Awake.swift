@@ -30,6 +30,14 @@ final class Awake {
             }
         }
 
+        /// Nome curto, para caber ao lado do rótulo do menu.
+        var short: String {
+            switch self {
+            case .display: "tela acesa"
+            case .system: "só o sistema"
+            }
+        }
+
         /// O tipo de asserção correspondente no IOKit.
         var assertionType: String {
             switch self {

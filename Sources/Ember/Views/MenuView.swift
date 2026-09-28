@@ -37,11 +37,18 @@ struct MenuView: View {
             }
         }
 
-        Menu(L.t("Mode")) {
+        // O modo ativo é escrito no rótulo do próprio menu, não só dentro
+        // dele: quem abre para conferir em que modo está não devia precisar
+        // navegar mais um nível para descobrir.
+        Menu("\(L.t("Mode")): \(L.t(model.mode.short))") {
             ForEach(Awake.Mode.allCases) { mode in
-                Toggle(L.t(mode.title), isOn: Binding(
-                    get: { model.mode == mode },
-                    set: { if $0 { model.mode = mode } }))
+                // Marca explícita em vez de Toggle: o Toggle dentro de menu
+                // deixou de mostrar estado, e um menu de escolha sem indicar a
+                // escolha atual é como esta preferência virou a errada sem
+                // ninguém notar.
+                Button("\(model.mode == mode ? "✓ " : "   ")\(L.t(mode.title))") {
+                    model.mode = mode
+                }
             }
         }
 
